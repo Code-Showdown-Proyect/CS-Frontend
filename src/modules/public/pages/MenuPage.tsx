@@ -13,9 +13,9 @@ const MenuPage = () => {
         <div>
             <h1>Menu Page</h1>
             <p>Welcome to the menu page.</p>
-            <button type={"button"} onClick={() => navigate('')}>Single Player</button>
+            <button type={"button"} onClick={() => navigate('/CreateCompetition', { state: {  mode: "sp" } })}>Single Player</button>
             <button type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>MultiPlayer</button>
-            <button type={"button"} onClick={() => navigate('')}>Configuration</button>
+            <button type={"button"} onClick={() => navigate('/Profile')}>Profile</button>
             <button type={"button"} onClick={() => navigate('')}>Tutorial</button>
             <button onClick={handleLogout}>LogOut</button>
         </div>

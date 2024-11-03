@@ -46,6 +46,7 @@ import OnlineCompetitionMenuPage from './modules/competitions/pages/OnlineCompet
 import CompetitionLobbyPage from './modules/competitions/pages/CompetitionLobbyPage.tsx';
 import JoinOnlineCompetitionPage from "./modules/competitions/pages/JoinOnlineCompetitionPage.tsx";
 import OnlineCompetitionPage from "./modules/competitions/pages/OnineCompetitionPage.tsx";
+import ProfilePage from "./modules/user/pages/ProfilePage.tsx";
 
 import {AuthProvider} from "./modules/auth/context/AuthContext.tsx";
 
@@ -70,6 +71,7 @@ const App = () => {
                             <Route path="/CompetitionLobby" element={<CompetitionLobbyPage />} />
                             <Route path="/JoinCompetition" element={<JoinOnlineCompetitionPage />} />
                             <Route path="/Competition/Start" element={<OnlineCompetitionPage />} />
+                            <Route path="/Profile" element={<ProfilePage />} />
                         </Route>
                     </Routes>
                 </div>

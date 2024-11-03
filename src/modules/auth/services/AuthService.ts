@@ -24,6 +24,13 @@ export const AuthService = {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }});
         return response.data
+    },profileValidation: async(data: {email: string, password: string})=>{
+        const response = await axios.post(`${API_URL}/login`, data);
+        return response.data.access_token;
+    },updatePassword: async(data: {email: string, current_password: string, new_password:string})=>{
+        await axios.put(`${API_URL}/update-password`, data);
+    }, updateUsername: async(data: {email: string, new_username: string})=>{
+        await axios.put(`${API_URL}/update-username`, data);
     }
 
 }

@@ -11,7 +11,7 @@ import {ChatMessage} from "../models/ChatMessage.ts";
 
 const CompetitionLobbyPage: React.FC = () => {
     const location = useLocation();
-    const { accessCode, password } = location.state || {};
+    const { accessCode, password, mode } = location.state || {};
     const [competitionId, setCompetitionId] = useState<number | null>(null);
     const [competitionName, setCompetitionName] = useState<string | null>(null);
     const [numberOfExercises, setNumberOfExercises] = useState<number | null>(null);
@@ -27,7 +27,7 @@ const CompetitionLobbyPage: React.FC = () => {
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
-
+    const isSinglePlayer = mode === 'sp';
     const navigate = useNavigate();
 
     const handleLeaveCompetition = async () => {
@@ -42,7 +42,11 @@ const CompetitionLobbyPage: React.FC = () => {
             }
 
             // Redirige al usuario a la página /JoinCompetition
-            navigate('/JoinCompetition');
+            if (isSinglePlayer){
+                navigate('/Menu');
+            }else {
+                navigate('/JoinCompetition');
+            }
         } catch (error: unknown) {
             if (error instanceof Error) {
                 alert(`Error al dejar la competencia: ${error.message}`);
@@ -138,7 +142,7 @@ const CompetitionLobbyPage: React.FC = () => {
                             websocket.close();
                             setWebSocket(null);
                         }
-                        navigate('/competition/start', { state: {  accessCode, password, competitionId } });
+                        navigate('/competition/start', { state: {  accessCode, password, competitionId, mode } });
                     }else if (data.type === 'feedback') {
                         setFeedbacks(prevFeedbacks => [...prevFeedbacks, data.feedback]);
                     } else if (data.type === 'all_participants_done') {
@@ -196,21 +200,24 @@ const CompetitionLobbyPage: React.FC = () => {
             <h2>Number of exercises: {numberOfExercises}</h2>
             <h2>Time Limit(minutes): {timeLimit}</h2>
             <h2>Host: {creatorName}</h2>
-            {accessCode ? (
+            {!isSinglePlayer && accessCode ? (
                 <div>
                     <p><strong>Código de Acceso:</strong> {accessCode}</p>
                     <p><strong>Contraseña:</strong> {password ? password : 'Sin contraseña establecida'}</p>
                     <p>Comparte estos detalles con los participantes para que puedan unirse a la competencia.</p>
                 </div>
-            ) : (
-                <p>Error: No se encontraron detalles de la competencia.</p>
+            ) : null}
+            {!isSinglePlayer && (
+                <>
+                    <h2>Usuarios Conectados</h2>
+                    <ul>
+                        {connectedUsers.map((user, index) => (
+                            <li key={index}>{user}</li>
+                        ))}
+                    </ul>
+                </>
             )}
-            <h2>Usuarios Conectados</h2>
-            <ul>
-                {connectedUsers.map((user, index) => (
-                    <li key={index}>{user}</li>
-                ))}
-            </ul>
+
 
             <h2>Desafíos Recibidos</h2>
             {challenges.length === 0 ? (
@@ -236,36 +243,40 @@ const CompetitionLobbyPage: React.FC = () => {
                     </div>
                 ))
             )}
+            {!isSinglePlayer && (
+                <>
+                    <h2>Chat entre Participantes</h2>
+                    <div className="chat-container">
+                        <div className="chat-messages">
+                            {messages.length === 0 ? (
+                                <p>No hay mensajes aún.</p>
+                            ) : (
+                                messages.map((message, index) => (
+                                    <div key={index}>
+                                        <strong>{message.user}:</strong> {message.message}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <div className="chat-input">
+                            <input
+                                type="text"
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleSendMessage();
+                                    }
+                                }}
+                                placeholder="Escribe un mensaje..."
+                            />
+                            <button onClick={handleSendMessage}>Send</button>
+                        </div>
 
-            <h2>Chat entre Participantes</h2>
-            <div className="chat-container">
-                <div className="chat-messages">
-                    {messages.length === 0 ? (
-                        <p>No hay mensajes aún.</p>
-                    ) : (
-                        messages.map((message, index) => (
-                            <div key={index}>
-                                <strong>{message.user}:</strong> {message.message}
-                            </div>
-                        ))
-                    )}
-                </div>
-                <div className="chat-input">
-                    <input
-                        type="text"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                handleSendMessage();
-                            }
-                        }}
-                        placeholder="Escribe un mensaje..."
-                    />
-                    <button onClick={handleSendMessage}>Send</button>
-                </div>
-                <button onClick={handleLeaveCompetition}>Left the competition</button>
-            </div>
+                    </div>
+                </>
+            )}
+            <button onClick={handleLeaveCompetition}>Left the competition</button>
             {isFormVisible && (
                 <GenerateChallengeForm
                     onSubmit={handleGenerateChallenges}
@@ -273,7 +284,8 @@ const CompetitionLobbyPage: React.FC = () => {
                 />
             )}
             {creatorId === currentUserId && (
-                <button onClick={() => setIsFormVisible(true)} disabled={isGenerateButtonDisabled()}>Generate Challenges</button>
+                <button onClick={() => setIsFormVisible(true)} disabled={isGenerateButtonDisabled()}>Generate
+                    Challenges</button>
             )}
             {creatorId === currentUserId && (
                 <button onClick={handleStartCompetition} disabled={!isGenerateButtonDisabled}>

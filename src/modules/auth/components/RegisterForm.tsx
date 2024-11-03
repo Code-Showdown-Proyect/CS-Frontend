@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AuthService } from '../services/AuthService';
 import {useNavigate} from "react-router-dom";
+import {ProfileService} from "../../user/services/ProfileService.ts";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ const RegisterForm = () => {
         }
         try {
             await AuthService.register({ email, password, username, role: 'basic'});
+            await ProfileService.createProfile({email, password});
             alert("Registered successfully. You can now login.");
             navigate('/auth/Login');
         } catch (error) {

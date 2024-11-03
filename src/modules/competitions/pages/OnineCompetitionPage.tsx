@@ -8,7 +8,7 @@ import {CompetitionService} from "../services/CompetitionService.ts";
 const OnlineCompetitionPage:React.FC=()=>{
     const location = useLocation();
     const navigate = useNavigate();
-    const { accessCode, password, competitionId} = location.state;
+    const { accessCode, password, competitionId, mode} = location.state;
     const [challenge, setChallenge] = useState<Challenge | null>(null);
     const [code, setCode] = useState<string>("");
     const [websocket, setWebsocket] = useState<WebSocket | null>(null);
@@ -18,7 +18,7 @@ const OnlineCompetitionPage:React.FC=()=>{
     const [competitionFinished, setCompetitionFinished] = useState<boolean>(false);
     const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
-
+    const isSinglePlayer = mode === 'sp';
     useEffect(() => {
         const fetchUserId = async () => {
             try {
@@ -147,32 +147,33 @@ const OnlineCompetitionPage:React.FC=()=>{
                         <p><strong>Score:</strong> {feedback.score}</p>
                     </div>
                 ))}
-                <button onClick={() => navigate('/CompetitionLobby', { state: {accessCode, password, competitionId }})}>Back to Lobby</button>
+                <button onClick={() => navigate('/CompetitionLobby', { state: {accessCode, password, competitionId, mode }})}>Back to Lobby</button>
             </div>
         );
     }
     return (
         <div>
             <h1>Competition in Progress</h1>
-            <div className="chat-section">
-                <h2>Participants Chat</h2>
-                <div className="chat-messages">
-                    {messages.map((msg, index) => (
-                        <div key={index}>{msg}</div>
-                    ))}
+            {!isSinglePlayer && (
+                <div className="chat-section">
+                    <h2>Participants Chat</h2>
+                    <div className="chat-messages">
+                        {messages.map((msg, index) => (
+                            <div key={index}>{msg}</div>
+                        ))}
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Write a Message..."
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value) {
+                                handleSendMessage(e.currentTarget.value);
+                                e.currentTarget.value = "";
+                            }
+                        }}
+                    />
                 </div>
-                <input
-                    type="text"
-                    placeholder="Write a Message..."
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.currentTarget.value) {
-                            handleSendMessage(e.currentTarget.value);
-                            e.currentTarget.value = "";
-                        }
-                    }}
-                />
-            </div>
-
+            )}
             <div className="challenge-section">
                 <h2>Current Challenge</h2>
                 {waitingForOthers ? (

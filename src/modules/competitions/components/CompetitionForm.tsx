@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {CompetitionService} from "../services/CompetitionService.ts";
 
 const CompetitionForm: React.FC = () => {
@@ -8,6 +8,9 @@ const CompetitionForm: React.FC = () => {
     const [timeLimit, setTimeLimit] = useState<number>(0);
     const [numberOfExercises, setNumberOfExercises] = useState<number>(0);
     const navigate = useNavigate();
+    const location = useLocation();
+    const {mode} = location.state || {};
+    const isSinglePlayer = mode === 'sp';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -16,14 +19,14 @@ const CompetitionForm: React.FC = () => {
             name,
             number_of_exercises:numberOfExercises,
             time_limit: timeLimit,
-            password
+            password: isSinglePlayer ? '' : password,
         };
 
         try {
             const access_code = await CompetitionService.createCompetition(competitionData);
             await CompetitionService.joinCompetition(access_code, password);
             alert('Competition created successfully.');
-            navigate('/CompetitionLobby', {state: {accessCode:access_code, password}}); // Redirige a la lista de competencias.
+            navigate('/CompetitionLobby', {state: {accessCode:access_code, password, mode}}); // Redirige a la lista de competencias.
         } catch (error) {
             console.error('Error creating the competition:', error);
             alert('There was an error creating the competition.');
@@ -59,17 +62,24 @@ const CompetitionForm: React.FC = () => {
                     required
                 />
             </div>
-            <div>
-                <label>Password (if you can't set a password leave in blank)</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-            </div>
+            {!isSinglePlayer && (
+                <div>
+                    <label>Password (if you can't set a password leave in blank)</label>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+            )}
             <button type="submit">Create Competition</button>
-            <button type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>Back</button>
+            {!isSinglePlayer && (
+                <button type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>Back</button>
+            )}
+            {isSinglePlayer && (
+                <button type={"button"} onClick={() => navigate('/Menu')}>Back</button>
+            )}
         </form>
     );
 };
