@@ -95,7 +95,7 @@ const ProfilePage: React.FC=() =>{
         <div>
             <Navbar/>
             <div className="w-full justify-items-center mt-5">
-                <h1 className="mt-1 text-left text-2xl/9 font-bold tracking-tight text-gray-900">ProfilePage</h1>
+                <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">ProfilePage</h1>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
