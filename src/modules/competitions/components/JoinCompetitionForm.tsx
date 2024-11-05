@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CompetitionService } from "../services/CompetitionService.ts";
+import {Label} from "../../../shared/components/UI/Label.tsx";
+import {Input} from "../../../shared/components/UI/Input.tsx";
+import Button from "../../../shared/components/UI/Button.tsx";
+import {ArrowLeftIcon} from "@heroicons/react/16/solid";
 
 const JoinCompetitionForm: React.FC = () => {
     const [accessCode, setAccessCode] = useState('');
@@ -21,28 +25,36 @@ const JoinCompetitionForm: React.FC = () => {
     };
 
     return (
-        <form onSubmit={handleJoin}>
-            <div>
-                <label>Access Code</label>
-                <input
-                    type="text"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    required
-                />
-            </div>
-            <div>
-                <label>Password</label>
-                <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit">Join Competition</button>
-            <button type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>Back</button>
-        </form>
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form className="space-y-6" onSubmit={handleJoin}>
+                <div className="mt-2">
+                    <Label>Access Code</Label>
+                    <Input
+                        placeholder="ASXSD"
+                        type="text"
+                        value={accessCode}
+                        onChange={(e) => setAccessCode(e.target.value)}
+                        required
+                    />
+                </div>
+                <div className="mt-2">
+                    <Label>Password</Label>
+                    <Input
+                        placeholder="********"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
+                <Button variant="secondary" type="submit">Join Competition</Button>
+                <Button variant="secondary" type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>
+                    <div className="flex items-center space-x-2">
+                        <ArrowLeftIcon className="h-5 w-5"/>
+                        <span>Back</span>
+                    </div>
+                </Button>
+            </form>
+        </div>
     );
 };
 

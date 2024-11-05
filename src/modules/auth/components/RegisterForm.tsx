@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { AuthService } from '../services/AuthService';
 import {useNavigate} from "react-router-dom";
 import {ProfileService} from "../../user/services/ProfileService.ts";
+import {Label} from "../../../shared/components/UI/Label.tsx";
+import {Input} from "../../../shared/components/UI/Input.tsx";
+import Button from "../../../shared/components/UI/Button.tsx";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState('');
@@ -28,26 +31,28 @@ const RegisterForm = () => {
     };
 
     return (
-        <form onSubmit={handleRegister}>
-            <div>
-                <label>Email:</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
-            </div>
-            <div>
-                <label>Username:</label>
-                <input type="username" value={username} onChange={(e) => setUsername(e.target.value)} required/>
-            </div>
-            <div>
-                <label>Password:</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required/>
-            </div>
-            <div>
-                <label>Confirm Password:</label>
-                <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                       required/>
-            </div>
-            <button type="submit">Register</button>
-        </form>
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form className="space-y-6" onSubmit={handleRegister}>
+                <div className="mt-2">
+                    <Label>Email:</Label>
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required/>
+                </div>
+                <div className="mt-2">
+                    <Label>Username:</Label>
+                    <Input type="username" value={username} onChange={(e) => setUsername(e.target.value)} required/>
+                </div>
+                <div className="mt-2">
+                    <Label>Password:</Label>
+                    <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required/>
+                </div>
+                <div className="mt-2">
+                    <Label>Confirm Password:</Label>
+                    <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                           required/>
+                </div>
+                <Button variant="primary" type="submit">Register</Button>
+            </form>
+        </div>
     );
 };
 

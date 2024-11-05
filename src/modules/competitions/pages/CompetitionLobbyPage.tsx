@@ -8,6 +8,10 @@ import GenerateChallengeForm from "../../challenges/components/GenerateChallenge
 import {Challenge} from "../models/Challenge.ts";
 import {Feedback} from "../models/Feedback.ts";
 import {ChatMessage} from "../models/ChatMessage.ts";
+import Navbar from "../../public/components/Navbar.tsx";
+import Button from "../../../shared/components/UI/Button.tsx";
+import {PaperAirplaneIcon, UserCircleIcon} from "@heroicons/react/16/solid";
+import {Input} from "../../../shared/components/UI/Input.tsx";
 
 const CompetitionLobbyPage: React.FC = () => {
     const location = useLocation();
@@ -29,7 +33,7 @@ const CompetitionLobbyPage: React.FC = () => {
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const isSinglePlayer = mode === 'sp';
     const navigate = useNavigate();
-
+    document.title = "Lobby";
     const handleLeaveCompetition = async () => {
         try {
             await CompetitionService.leaveCompetition(accessCode);
@@ -195,103 +199,138 @@ const CompetitionLobbyPage: React.FC = () => {
 
     return (
         <div>
-            <h1>Lobby de Competencia</h1>
-            <h2>{competitionName}</h2>
-            <h2>Number of exercises: {numberOfExercises}</h2>
-            <h2>Time Limit(minutes): {timeLimit}</h2>
-            <h2>Host: {creatorName}</h2>
-            {!isSinglePlayer && accessCode ? (
+            <Navbar/>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 pt-9 lg:px-8">
                 <div>
-                    <p><strong>Código de Acceso:</strong> {accessCode}</p>
-                    <p><strong>Contraseña:</strong> {password ? password : 'Sin contraseña establecida'}</p>
-                    <p>Comparte estos detalles con los participantes para que puedan unirse a la competencia.</p>
+                    <div className="grid ggrid-cols-1 md:grid-cols-2 gap-4">
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Name: {competitionName}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Number of
+                            exercises: {numberOfExercises}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Time
+                            Limit(minutes): {timeLimit}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Host: {creatorName}</h2>
+
+                    </div>
+                    {!isSinglePlayer && accessCode ? (
+                        <div>
+                            <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900"><strong>
+                                Access Code:</strong> {accessCode}</p>
+                            <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">
+                                <strong>Password: </strong> {password ? password : 'Sin contraseña establecida'}</p>
+                        </div>
+                    ) : null}
+                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Challenges</h2>
+                    {challenges.length === 0 ? (
+                        <p className="ml-3">No hay desafíos disponibles aún.</p>
+                    ) : (
+                        challenges.map((challenge, index) => (
+                            <div className="ml-3" key={index}>
+                                <h3>Challenge {index + 1}</h3>
+                                <p><strong>Title:</strong> {challenge.title}</p>
+                            </div>
+                        ))
+                    )}
+
+                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Feedbacks</h2>
+                    {feedbacks.length === 0 ? (
+                        <p className="ml-3">Aún no hay feedbacks disponibles.</p>
+                    ) : (
+                        feedbacks.map((feedback, index) => (
+                            <div className="ml-3" key={index}>
+                                <h3>Desafío: {feedback.challenge_title}</h3>
+                                <p><strong>Feedback:</strong> {feedback.feedback}</p>
+                                <p><strong>Score:</strong> {feedback.score}</p>
+                            </div>
+                        ))
+                    )}
+
+                    {creatorId === currentUserId && (
+                        <div className="justify-items-center w-full mt-5">
+                            <div className="max-w-40">
+                                <Button variant="primary" onClick={() => setIsFormVisible(true)}
+                                        disabled={isGenerateButtonDisabled()}>Generate
+                                    Challenges
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                    {isFormVisible && (
+                        <GenerateChallengeForm
+                            onSubmit={handleGenerateChallenges}
+                            onCancel={() => setIsFormVisible(false)}
+                        />
+                    )}
                 </div>
-            ) : null}
-            {!isSinglePlayer && (
-                <>
-                    <h2>Usuarios Conectados</h2>
-                    <ul>
-                        {connectedUsers.map((user, index) => (
-                            <li key={index}>{user}</li>
-                        ))}
-                    </ul>
-                </>
-            )}
-
-
-            <h2>Desafíos Recibidos</h2>
-            {challenges.length === 0 ? (
-                <p>No hay desafíos disponibles aún.</p>
-            ) : (
-                challenges.map((challenge, index) => (
-                    <div key={index}>
-                        <h3>Desafío {index + 1}</h3>
-                        <p><strong>Título:</strong> {challenge.title}</p>
-                    </div>
-                ))
-            )}
-
-            <h2>Feedbacks Recibidos</h2>
-            {feedbacks.length === 0 ? (
-                <p>Aún no hay feedbacks disponibles.</p>
-            ) : (
-                feedbacks.map((feedback, index) => (
-                    <div key={index}>
-                        <h3>Desafío: {feedback.challenge_title}</h3>
-                        <p><strong>Feedback:</strong> {feedback.feedback}</p>
-                        <p><strong>Puntuación:</strong> {feedback.score}</p>
-                    </div>
-                ))
-            )}
-            {!isSinglePlayer && (
-                <>
-                    <h2>Chat entre Participantes</h2>
-                    <div className="chat-container">
-                        <div className="chat-messages">
-                            {messages.length === 0 ? (
-                                <p>No hay mensajes aún.</p>
-                            ) : (
-                                messages.map((message, index) => (
-                                    <div key={index}>
-                                        <strong>{message.user}:</strong> {message.message}
-                                    </div>
-                                ))
-                            )}
+                <div>
+                    {!isSinglePlayer && (
+                        <div>
+                            <h2 className="mt-1 mb-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Connected
+                                Users</h2>
+                            <ul className="ml-3">
+                                {connectedUsers.map((user, index) => (
+                                    <li key={index} className="flex items-center space-x-2">
+                                        <UserCircleIcon className="h-5"/>
+                                        <span className="font-medium">{user}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-                        <div className="chat-input">
-                            <input
-                                type="text"
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handleSendMessage();
-                                    }
-                                }}
-                                placeholder="Escribe un mensaje..."
-                            />
-                            <button onClick={handleSendMessage}>Send</button>
+                    )}
+                    {!isSinglePlayer && (
+                        <div>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Chat
+                                entre Participantes</h2>
+                            <div className="chat-container mt-2 h-96  border rounded-md p-4 bg-gray-50 m-5">
+                                <div
+                                    className="chat-messages  h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
+                                    {messages.length === 0 ? (
+                                        <p>No hay mensajes aún.</p>
+                                    ) : (
+                                        messages.map((message, index) => (
+                                            <div key={index} className="mb-2">
+                                                <strong>{message.user}:</strong> {message.message}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                <div
+                                    className="chat-input mt-4 flex flex-col md:flex-row items-center md:space-x-2 space-y-2 md:space-y-0">
+                                    <Input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleSendMessage();
+                                            }
+                                        }}
+                                        placeholder="Write a message"
+                                    />
+                                    <Button variant="primary" onClick={handleSendMessage}>
+                                        <div className="flex items-center space-x-2">
+                                            Send <PaperAirplaneIcon className="h-5 ml-3"/>
+                                        </div>
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
+                    )}
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 md:pr-52 md:pl-52 gap-4 mb-10">
+                <div className="m-5">
+                    <Button variant="secondary" onClick={handleLeaveCompetition}>Left the competition</Button>
+                </div>
 
+                {creatorId === currentUserId && (
+                    <div className="m-5">
+                        <Button variant="primary" onClick={handleStartCompetition}
+                                disabled={!isGenerateButtonDisabled}>
+                            Start Competition
+                        </Button>
                     </div>
-                </>
-            )}
-            <button onClick={handleLeaveCompetition}>Left the competition</button>
-            {isFormVisible && (
-                <GenerateChallengeForm
-                    onSubmit={handleGenerateChallenges}
-                    onCancel={() => setIsFormVisible(false)}
-                />
-            )}
-            {creatorId === currentUserId && (
-                <button onClick={() => setIsFormVisible(true)} disabled={isGenerateButtonDisabled()}>Generate
-                    Challenges</button>
-            )}
-            {creatorId === currentUserId && (
-                <button onClick={handleStartCompetition} disabled={!isGenerateButtonDisabled}>
-                    Start Competition
-                </button>
-            )}
+                )}
+            </div>
         </div>
     );
 };
