@@ -2,6 +2,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuIt
 import { Bars3Icon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline';
 import {Link, NavLink, useNavigate} from 'react-router-dom';
 import {useAuth} from "../../auth/hooks/useAuth.ts";
+import logo from "../../../assets/logo.png";
 
 const navigation = [
     {name: 'Menu', href: '/menu', current: true },
@@ -36,7 +37,7 @@ export default function Navbar() {
                     </div>
                     <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                         <div className="flex flex-shrink-0 items-center">
-                            <img className="mx-auto h-11 w-auto rounded-full" src="/src/assets/logo.png"
+                            <img className="mx-auto h-11 w-auto rounded-full" src={logo}
                                  alt="Code Showdown"/>
                         </div>
                         <div className="hidden sm:ml-6 sm:block">
