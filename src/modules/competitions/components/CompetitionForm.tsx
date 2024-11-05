@@ -4,6 +4,7 @@ import {CompetitionService} from "../services/CompetitionService.ts";
 import {Label} from "../../../shared/components/UI/Label.tsx";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
+import {FaSpinner} from "react-icons/fa";
 
 const CompetitionForm: React.FC = () => {
     const [name, setName] = useState('');
@@ -14,23 +15,25 @@ const CompetitionForm: React.FC = () => {
     const location = useLocation();
     const {mode} = location.state || {};
     const isSinglePlayer = mode === 'sp';
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         const competitionData = {
             name,
             number_of_exercises: Number(numberOfExercises),
             time_limit: Number(timeLimit),
             password: isSinglePlayer ? '' : password,
         };
-
         try {
+            setIsLoading(true);
             const access_code = await CompetitionService.createCompetition(competitionData);
             await CompetitionService.joinCompetition(access_code, password);
             alert('Competition created successfully.');
+            setIsLoading(false);
             navigate('/CompetitionLobby', {state: {accessCode:access_code, password, mode}}); // Redirige a la lista de competencias.
         } catch (error) {
+            setIsLoading(false);
             console.error('Error creating the competition:', error);
             alert('There was an error creating the competition.');
         }
@@ -38,9 +41,18 @@ const CompetitionForm: React.FC = () => {
 
     return (
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-            <form  className="space-y-6" onSubmit={handleSubmit}>
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
+                        <p className="text-lg font-semibold">Generating Competition...</p>
+                        <p>Please wait while we create the competition. This might take a few seconds.</p>
+                    </div>
+                </div>
+            )}
+            <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="mt-2">
-                    <Label>Competition Name</Label>
+                <Label>Competition Name</Label>
                     <Input
                         placeholder="example"
                         type="text"

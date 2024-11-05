@@ -12,6 +12,7 @@ import Navbar from "../../public/components/Navbar.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {PaperAirplaneIcon, UserCircleIcon} from "@heroicons/react/16/solid";
 import {Input} from "../../../shared/components/UI/Input.tsx";
+import {FaSpinner} from "react-icons/fa";
 
 const CompetitionLobbyPage: React.FC = () => {
     const location = useLocation();
@@ -31,6 +32,8 @@ const CompetitionLobbyPage: React.FC = () => {
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState(false);
+
     const isSinglePlayer = mode === 'sp';
     const navigate = useNavigate();
     document.title = "Lobby";
@@ -61,24 +64,28 @@ const CompetitionLobbyPage: React.FC = () => {
     };
     const handleGenerateChallenges = async (difficulty: string, topic: string) => {
         if (competitionId && numberOfExercises) {
-            for (let i = 0; i < numberOfExercises; i++) {
-                try {
-                    console.log("Diffuculty: ",difficulty)
-                    console.log("Topic: ",topic)
-                    await ChallengeService.generateChallenge({
-                        difficulty,
-                        topic,
-                        competition_id: competitionId,
-                    });
-                } catch (error) {
-                    console.error('Error generating challenge:', error);
+            setIsLoading(true);
+            try{
+                for (let i = 0; i < numberOfExercises; i++) {
+                    try {
+                        console.log("Diffuculty: ",difficulty)
+                        console.log("Topic: ",topic)
+                        await ChallengeService.generateChallenge({
+                            difficulty,
+                            topic,
+                            competition_id: competitionId,
+                        });
+                    } catch (error) {
+                        console.error('Error generating challenge:', error);
+                    }
                 }
+                if (websocket) {
+                    websocket.send("list_challenges");
+                }
+            }finally {
+                setIsFormVisible(false);
+                setIsLoading(false);
             }
-            if (websocket) {
-                websocket.send("list_challenges");
-            }
-            alert('Challenge Created Successfully.');
-            setIsFormVisible(false);
         }
     };
     const handleSendMessage = () => {
@@ -146,7 +153,7 @@ const CompetitionLobbyPage: React.FC = () => {
                             websocket.close();
                             setWebSocket(null);
                         }
-                        navigate('/competition/start', { state: {  accessCode, password, competitionId, mode } });
+                        navigate('/competition/start', { state: {  accessCode, password, competitionId, mode, timeLimit} });
                     }else if (data.type === 'feedback') {
                         setFeedbacks(prevFeedbacks => [...prevFeedbacks, data.feedback]);
                     } else if (data.type === 'all_participants_done') {
@@ -200,9 +207,18 @@ const CompetitionLobbyPage: React.FC = () => {
     return (
         <div>
             <Navbar/>
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
+                        <p className="text-lg font-semibold">Generating Challenges...</p>
+                        <p>Please wait while we create the challenges. This might take a few seconds.</p>
+                    </div>
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 pt-9 lg:px-8">
                 <div>
-                    <div className="grid ggrid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid ggrid-cols-1 md:grid-cols-2 gap-4">
                         <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Name: {competitionName}</h2>
                         <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Number of
                             exercises: {numberOfExercises}</h2>
@@ -278,8 +294,7 @@ const CompetitionLobbyPage: React.FC = () => {
                     )}
                     {!isSinglePlayer && (
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Chat
-                                entre Participantes</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Chat</h2>
                             <div className="chat-container mt-2 h-96  border rounded-md p-4 bg-gray-50 m-5">
                                 <div
                                     className="chat-messages  h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
@@ -321,7 +336,6 @@ const CompetitionLobbyPage: React.FC = () => {
                 <div className="m-5">
                     <Button variant="secondary" onClick={handleLeaveCompetition}>Left the competition</Button>
                 </div>
-
                 {creatorId === currentUserId && (
                     <div className="m-5">
                         <Button variant="primary" onClick={handleStartCompetition}
