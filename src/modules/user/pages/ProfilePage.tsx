@@ -7,6 +7,7 @@ import Navbar from "../../public/components/Navbar.tsx";
 import {Label} from "../../../shared/components/UI/Label.tsx";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
+import {FaSpinner} from "react-icons/fa";
 
 const ProfilePage: React.FC=() =>{
     const [currentUser, setCurrentUser] = useState<AuthUser|null>(null);
@@ -25,12 +26,13 @@ const ProfilePage: React.FC=() =>{
     const [newLastName, setNewLastName] = useState('');
     const [newDescription, seNewtDescription] = useState('');
     const [newProfilePictureUrl, setNewProfilePictureUrl] = useState('');
-
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true);
                 const response = await ProfileService.getProfile();
                 setEmail(response.email);
                 setFirst_name(response.first_name);
@@ -39,7 +41,10 @@ const ProfilePage: React.FC=() =>{
                 setProfile_picture_url(response.profile_picture_url);
                 const currentUserResponse = await AuthService.getCurrentUser();
                 setCurrentUser(currentUserResponse);
+                setIsLoading(false);
             } catch (error) {
+                setIsLoading(false);
+                alert('There was an error getting the profile.');
                 console.error(error);               
             }
         };
@@ -92,8 +97,17 @@ const ProfilePage: React.FC=() =>{
         }
     }
     return (
+
         <div>
             <Navbar/>
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
+                        <p className="text-lg font-semibold">Getting Profile...</p>
+                    </div>
+                </div>
+            )}
             <div className="w-full justify-items-center mt-5">
                 <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">ProfilePage</h1>
             </div>

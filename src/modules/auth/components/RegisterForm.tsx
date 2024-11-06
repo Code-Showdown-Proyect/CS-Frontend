@@ -5,13 +5,14 @@ import {ProfileService} from "../../user/services/ProfileService.ts";
 import {Label} from "../../../shared/components/UI/Label.tsx";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
+import {FaSpinner} from "react-icons/fa";
 
 const RegisterForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [username, setUsername] = useState('');
-
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -20,11 +21,14 @@ const RegisterForm = () => {
             return;
         }
         try {
+            setIsLoading(true);
             await AuthService.register({ email, password, username, role: 'basic'});
             await ProfileService.createProfile({email, password});
+            setIsLoading(false);
             alert("Registered successfully. You can now login.");
             navigate('/auth/Login');
         } catch (error) {
+            setIsLoading(false);
             console.error("Register failed", error);
             alert("Register failed. Please try again.");
         }
@@ -32,6 +36,14 @@ const RegisterForm = () => {
 
     return (
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
+                        <p className="text-lg font-semibold">Signing in...</p>
+                    </div>
+                </div>
+            )}
             <form className="space-y-6" onSubmit={handleRegister}>
                 <div className="mt-2">
                     <Label>Email:</Label>

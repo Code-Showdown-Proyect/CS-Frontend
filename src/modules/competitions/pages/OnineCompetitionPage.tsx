@@ -28,7 +28,7 @@ const OnlineCompetitionPage:React.FC=()=>{
     const [feedbacks, setFeedbacks] = useState<FeedbackMessage[]>([]);
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [newMessage, setNewMessage] = useState<string>('');
-    const [timeRemaining, setTimeRemaining] = useState<number>((timeLimit/5) * 60);
+    const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
     const isSinglePlayer = mode === 'sp';
     document.title = "Competition";
@@ -66,9 +66,10 @@ const OnlineCompetitionPage:React.FC=()=>{
                 setMessages(prevMessages => [...prevMessages, data]);
             } else if (data.type === 'new_challenge') {
                 setChallenge(data);
-                setWaitingForOthers(false); // Permitir enviar la respuesta ya que hay un nuevo desafío.
+                setTimeRemaining(timeLimit * 60);
+                setWaitingForOthers(false);
             }  else if (data.message === 'Waiting_others') {
-                setWaitingForOthers(true); // Deshabilitar el envío de respuestas mientras se espera a los demás.
+                setWaitingForOthers(true);
             } else if (data.action === 'all_participants_done') {
                 console.log('all_participants_done');
                 setCompetitionFinished(true);
@@ -76,7 +77,7 @@ const OnlineCompetitionPage:React.FC=()=>{
             }else if (data.type === 'feedbacks') {
                 setCompetitionFinished(true);
                 console.log('Receiving feedbacks:', data);
-                setFeedbacks(data.data); // `data.data` es un array de `FeedbackMessage`
+                setFeedbacks(data.data);
             }
         }
 
@@ -167,7 +168,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
                         <p className="text-lg font-semibold">Generating Feedbacks...</p>
-                        <p>Please wait while we create the feedbacks. This might take a few seconds.</p>
+                        <p>Please wait while we create the feedbacks.</p>
                     </div>
                 </div>
             );
@@ -218,8 +219,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                     <div className="overflow-y-scroll overflow-x-hidden max-h-[50vh] p-2 bg-white rounded-md shadow-md">
                     {waitingForOthers ? (
                             <div>
-                                <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">WAIT
-                                    FOR OTHERS TO FINISH THE CHALLENGE</p>
+                                <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900"> Wait for others to finish their challenges</p>
                             </div>
                         ) : challenge ? (
                             <div>

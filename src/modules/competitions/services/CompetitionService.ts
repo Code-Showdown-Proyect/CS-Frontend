@@ -71,5 +71,13 @@ export const CompetitionService = {
     },getParticipantByUserIdAndCompetitionId: async (competitionId: number, userId: number) => {
         const response = await axios.get(`${API_URL}/get-participant/${userId}/${competitionId}`);
         return response.data;
+    }, validateParticipantIsInCompetition: async (competitionId: number|null, userId: number|null) => {
+        try {
+            const response = await axios.get(`${API_URL}/get-participant/${userId}/${competitionId}`);
+            return !!response.data;
+        } catch (error) {
+            console.error("Error fetching participant data:", error);
+            return false;
+        }
     }
 };

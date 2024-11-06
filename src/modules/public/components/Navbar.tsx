@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline';
-import {Link, NavLink, useNavigate} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {useAuth} from "../../auth/hooks/useAuth.ts";
 import logo from "../../../assets/logo.png";
 
@@ -17,6 +17,13 @@ function classNames(...classes: string[]):string {
 export default function Navbar() {
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const handleNavigation = (item: {name: string , href: string, current: boolean}) => {
+        if (item.name === 'Single Player') {
+            navigate(item.href, { state: { mode: "sp" } });
+        } else {
+            navigate(item.href);
+        }
+    }
     const handleLogout = () => {
         logout();
         navigate('/auth/login'); // Redirigir al usuario al login después de cerrar sesión.
@@ -43,17 +50,16 @@ export default function Navbar() {
                         <div className="hidden sm:ml-6 sm:block">
                             <div className="flex space-x-4">
                                 {navigation.map((item) => (
-                                    <NavLink
+                                    <button
                                         key={item.name}
-                                        to={item.href}
-                                        className={({ isActive }) => classNames(
-                                            isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                        onClick={() => handleNavigation(item)}
+                                        className={classNames(
+                                            item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                                             'rounded-md px-3 py-2 text-sm font-medium'
                                         )}
-                                        aria-current={item.current ? 'page' : undefined}
                                     >
                                         {item.name}
-                                    </NavLink>
+                                    </button>
                                 ))}
                             </div>
                         </div>

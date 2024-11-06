@@ -33,38 +33,42 @@ const CompetitionLobbyPage: React.FC = () => {
     const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingGeneration, setIsLoadingGeneration] = useState(false);
 
     const isSinglePlayer = mode === 'sp';
     const navigate = useNavigate();
     document.title = "Lobby";
     const handleLeaveCompetition = async () => {
-        try {
-            await CompetitionService.leaveCompetition(accessCode);
-            alert('You have left the competition successfully.');
+        const confirmLeave = window.confirm("Are you sure you want to leave the competition?");
+        if (confirmLeave) {
+            try {
+                await CompetitionService.leaveCompetition(accessCode);
+                alert('You have left the competition successfully.');
 
-            // Cierra el WebSocket si está abierto
-            if (websocket) {
-                websocket.close();
-                setWebSocket(null);
-            }
+                // Cierra el WebSocket si está abierto
+                if (websocket) {
+                    websocket.close();
+                    setWebSocket(null);
+                }
 
-            // Redirige al usuario a la página /JoinCompetition
-            if (isSinglePlayer){
-                navigate('/Menu');
-            }else {
-                navigate('/JoinCompetition');
-            }
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                alert(`Error al dejar la competencia: ${error.message}`);
-            } else {
-                alert("Error al dejar la competencia y no se pudo identificar el mensaje del error.");
+                // Redirige al usuario a la página /JoinCompetition
+                if (isSinglePlayer){
+                    navigate('/Menu');
+                }else {
+                    navigate('/JoinCompetition');
+                }
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    alert(`Error al dejar la competencia: ${error.message}`);
+                } else {
+                    alert("Error al dejar la competencia y no se pudo identificar el mensaje del error.");
+                }
             }
         }
     };
     const handleGenerateChallenges = async (difficulty: string, topic: string) => {
         if (competitionId && numberOfExercises) {
-            setIsLoading(true);
+            setIsLoadingGeneration(true);
             try{
                 for (let i = 0; i < numberOfExercises; i++) {
                     try {
@@ -84,7 +88,7 @@ const CompetitionLobbyPage: React.FC = () => {
                 }
             }finally {
                 setIsFormVisible(false);
-                setIsLoading(false);
+                setIsLoadingGeneration(false);
             }
         }
     };
@@ -107,6 +111,7 @@ const CompetitionLobbyPage: React.FC = () => {
     useEffect(() => {
         const fetchCompetitionId = async () => {
             try {
+                setIsLoading(true);
                 const competitionData = await CompetitionService.getCompetitionByAccessCode(accessCode);
                 const userdata = await AuthService.getUserData(competitionData.creator_id);
                 const currentUser = await AuthService.getCurrentUser();
@@ -117,9 +122,21 @@ const CompetitionLobbyPage: React.FC = () => {
                 setCreatorName(userdata.username);
                 setCreatorId(competitionData.creator_id);
                 setCurrentUserId(currentUser.user_id);
+                const validParticipant = await CompetitionService.validateParticipantIsInCompetition(
+                    competitionData.competition_id,
+                    currentUser.user_id
+                );
+                if (!validParticipant) {
+                    alert('You are not a participant of this competition.');
+                    navigate('/JoinCompetition');
+                }
             } catch (error) {
+                setIsLoading(false);
                 console.error('Error fetching competition ID:', error);
+                alert('Error al obtener la información de la competencia.');
+                navigate('/JoinCompetition');
             }
+            setIsLoading(false);
         };
         if (accessCode) {
             fetchCompetitionId();
@@ -149,6 +166,7 @@ const CompetitionLobbyPage: React.FC = () => {
                     } else if (data.type === 'challenge_list') {
                         setChallenges(data.challenges);
                     } else if(data.type === 'start_competition'){
+                        setIsNavigating(true);
                         if (websocket) {
                             websocket.close();
                             setWebSocket(null);
@@ -190,7 +208,10 @@ const CompetitionLobbyPage: React.FC = () => {
             };
 
             const handleNavigation = () => {
-                setIsNavigating(true);
+                console.log("estado: ", isNavigating);
+                if(!isNavigating){
+                    handleLeaveCompetition()
+                }
             };
 
             window.addEventListener('beforeunload', handleBeforeUnload);
@@ -208,6 +229,14 @@ const CompetitionLobbyPage: React.FC = () => {
         <div>
             <Navbar/>
             {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
+                        <p className="text-lg font-semibold">Getting Competition...</p>
+                    </div>
+                </div>
+            )}
+            {isLoadingGeneration && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
@@ -263,8 +292,7 @@ const CompetitionLobbyPage: React.FC = () => {
                     {creatorId === currentUserId && (
                         <div className="justify-items-center w-full mt-5">
                             <div className="max-w-40">
-                                <Button variant="primary" onClick={() => setIsFormVisible(true)}
-                                        disabled={isGenerateButtonDisabled()}>Generate
+                                <Button variant={isGenerateButtonDisabled() ? 'disabled' : 'primary'} onClick={() => setIsFormVisible(true)}>Generate
                                     Challenges
                                 </Button>
                             </div>
@@ -338,8 +366,8 @@ const CompetitionLobbyPage: React.FC = () => {
                 </div>
                 {creatorId === currentUserId && (
                     <div className="m-5">
-                        <Button variant="primary" onClick={handleStartCompetition}
-                                disabled={!isGenerateButtonDisabled}>
+                        <Button  onClick={handleStartCompetition}
+                                variant={!isGenerateButtonDisabled() ? 'disabled' : 'primary'}>
                             Start Competition
                         </Button>
                     </div>
