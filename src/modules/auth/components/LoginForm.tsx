@@ -5,6 +5,7 @@ import {Input} from "../../../shared/components/UI/Input.tsx";
 import {Label} from "../../../shared/components/UI/Label.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 const LoginForm = () => {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const authContext = useContext(AuthContext); // Obtén el contexto
     const [isLoading, setIsLoading] = useState(false);
+    const [t] = useTranslation("global");
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -34,23 +36,23 @@ const LoginForm = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
-                        <p className="text-lg font-semibold">Signing in...</p>
+                        <p className="text-lg font-semibold">{t("login.loading")}</p>
                     </div>
                 </div>
             )}
             <form className="space-y-6"  onSubmit={handleLogin}>
                 <div className="mt-2">
-                    <Label>Email:</Label>
+                    <Label>{t("login.email")}:</Label>
                     <Input id="email" placeholder="email@example.com" type="email" value={email}
                            onChange={(e) => setEmail(e.target.value)} required/>
                 </div>
                 <div className="mt-2">
-                    <Label>Password:</Label>
+                    <Label>{t("login.password")}:</Label>
                     <Input id="password" placeholder="********" type="password" value={password}
                            onChange={(e) => setPassword(e.target.value)} required/>
                 </div>
-                <Button variant="primary"  type="submit">Login</Button>
-                <Button variant="secondary" type={"button"} onClick={() => navigate('/auth/register')}>Register</Button>
+                <Button variant="primary"  type="submit">{t("login.login")}</Button>
+                <Button variant="secondary" type={"button"} onClick={() => navigate('/auth/register')}>{t("login.register")}</Button>
             </form>
         </div>
     );

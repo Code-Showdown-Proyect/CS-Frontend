@@ -5,6 +5,8 @@ import {Label} from "../../../shared/components/UI/Label.tsx";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
+import {ArrowLeftIcon} from "@heroicons/react/16/solid";
 
 const CompetitionForm: React.FC = () => {
     const [name, setName] = useState('');
@@ -16,6 +18,7 @@ const CompetitionForm: React.FC = () => {
     const {mode} = location.state || {};
     const isSinglePlayer = mode === 'sp';
     const [isLoading, setIsLoading] = useState(false);
+    const [t] = useTranslation("global");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,13 +32,13 @@ const CompetitionForm: React.FC = () => {
             setIsLoading(true);
             const access_code = await CompetitionService.createCompetition(competitionData);
             await CompetitionService.joinCompetition(access_code, password);
-            alert('Competition created successfully.');
+            alert(t("create-competition.success"));
             setIsLoading(false);
             navigate('/CompetitionLobby', {state: {accessCode:access_code, password, mode}}); // Redirige a la lista de competencias.
         } catch (error) {
             setIsLoading(false);
             console.error('Error creating the competition:', error);
-            alert('There was an error creating the competition.');
+            alert(t("create-competition.error"));
         }
     };
 
@@ -45,16 +48,14 @@ const CompetitionForm: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
-                        <p className="text-lg font-semibold">Generating Competition...</p>
-                        <p>Please wait while we create the competition. This might take a few seconds.</p>
+                        <p className="text-lg font-semibold">{t("create-competition.loading")}</p>
                     </div>
                 </div>
             )}
             <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="mt-2">
-                <Label>Competition Name</Label>
+                <Label>{t("create-competition.name")}</Label>
                     <Input
-                        placeholder="example"
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -62,7 +63,7 @@ const CompetitionForm: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <Label>Numbers of Exercises (1-4)</Label>
+                    <Label>{t("create-competition.number-of-exercises")}</Label>
                     <Input
                         type="number"
                         placeholder="0"
@@ -79,7 +80,7 @@ const CompetitionForm: React.FC = () => {
                     />
                 </div>
                 <div>
-                    <Label>Time Limit (minutes 5-30)</Label>
+                    <Label>{t("create-competition.time-limit")}</Label>
                     <Input
                         type="number"
                         placeholder="0"
@@ -97,7 +98,7 @@ const CompetitionForm: React.FC = () => {
                 </div>
                 {!isSinglePlayer && (
                     <div>
-                        <Label>Password (if you can't set a password leave in blank)</Label>
+                        <Label>{t("create-competition.password")}</Label>
                         <Input
                             type="password"
                             placeholder="********"
@@ -106,12 +107,22 @@ const CompetitionForm: React.FC = () => {
                         />
                     </div>
                 )}
-                <Button type="submit">Create Competition</Button>
+                <Button type="submit">{t("create-competition.create")}</Button>
                 {!isSinglePlayer && (
-                    <Button type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>Back</Button>
+                    <Button variant="secondary" type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>
+                        <div className="flex items-center space-x-2">
+                            <ArrowLeftIcon className="h-5 w-5"/>
+                            <span>{t("create-competition.back")}</span>
+                        </div>
+                    </Button>
+
                 )}
                 {isSinglePlayer && (
-                    <Button type={"button"} onClick={() => navigate('/Menu')}>Back</Button>
+                    <Button variant="secondary" type={"button"}
+                            onClick={() => navigate('/Menu')}> <div className="flex items-center space-x-2">
+                        <ArrowLeftIcon className="h-5 w-5"/>
+                        <span>{t("create-competition.back")}</span>
+                    </div></Button>
                 )}
             </form>
         </div>

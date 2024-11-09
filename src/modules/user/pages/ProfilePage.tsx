@@ -8,6 +8,7 @@ import {Label} from "../../../shared/components/UI/Label.tsx";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 const ProfilePage: React.FC=() =>{
     const [currentUser, setCurrentUser] = useState<AuthUser|null>(null);
@@ -28,7 +29,8 @@ const ProfilePage: React.FC=() =>{
     const [newProfilePictureUrl, setNewProfilePictureUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-
+    const [t] = useTranslation("global")
+    document.title = t("profile.title");
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -44,7 +46,7 @@ const ProfilePage: React.FC=() =>{
                 setIsLoading(false);
             } catch (error) {
                 setIsLoading(false);
-                alert('There was an error getting the profile.');
+                alert(t("profile.error-getting-info"));
                 console.error(error);               
             }
         };
@@ -60,10 +62,10 @@ const ProfilePage: React.FC=() =>{
         };
         try {
             await AuthService.updatePassword(data);
-            alert('Password updated successfully.');
+            alert(t("profile.password-updated"));
         } catch (error) {
             console.error('Error updating the password:', error);
-            alert('There was an error updating the password.');
+            alert(t("profile.error-updating-password"));
         }
     }
     const handleChangeUsername = async (e: React.FormEvent) => {
@@ -74,10 +76,10 @@ const ProfilePage: React.FC=() =>{
         };
         try {
             await AuthService.updateUsername(data);
-            alert('Username updated successfully.');
+            alert(t("profile.username-updated"));
         }catch (error) {
-            console.error('Error updating the username:', error);
-            alert('There was an error updating the username.');
+            console.error(t("profile.error-updating-username"), " ", error);
+            alert(t("profile.error-updating-username"));
         }
     }
     const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -90,10 +92,10 @@ const ProfilePage: React.FC=() =>{
         };
         try {
             await ProfileService.updateProfile(data);
-            alert('Profile updated successfully.');
+            alert(t("profile.profile-updated"));
         } catch (error) {
-            console.error('Error updating the profile:', error);
-            alert('There was an error updating the profile.');
+            console.error(t("profile.error-updating-profile")," ", error);
+            alert(t("profile.error-updating-profile"));
         }
     }
     return (
@@ -104,33 +106,32 @@ const ProfilePage: React.FC=() =>{
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
-                        <p className="text-lg font-semibold">Getting Profile...</p>
+                        <p className="text-lg font-semibold">{t("profile.getting-info")}</p>
                     </div>
                 </div>
             )}
             <div className="w-full justify-items-center mt-5">
-                <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">ProfilePage</h1>
+                <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">{t("profile.title")}</h1>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                     {!changePasswordStatus && !changeUsernameStatus &&
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Session
-                                Information</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Username: {currentUser?.username}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Email: {currentUser?.email}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Role: {currentUser?.roles}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("profile.session-info")}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.username")}: {currentUser?.username}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.email")}: {currentUser?.email}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.role")}: {currentUser?.roles}</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                                 <div className="m-1">
                                     <Button variant="secondary"
                                             style={{visibility: !changePasswordStatus ? 'visible' : 'hidden'}}
-                                            onClick={() => setChangePasswordStatus(true)}>Change Password
+                                            onClick={() => setChangePasswordStatus(true)}>{t("profile.change-password")}
                                     </Button>
                                 </div>
                                 <div className="m-1">
                                     <Button variant="secondary"
                                             style={{visibility: !changeUsernameStatus ? 'visible' : 'hidden'}}
-                                            onClick={() => setChangeUsernameStatus(true)}>Change Username
+                                            onClick={() => setChangeUsernameStatus(true)}>{t("profile.change-username")}
                                     </Button>
                                 </div>
                             </div>
@@ -138,17 +139,16 @@ const ProfilePage: React.FC=() =>{
                     }
                     {changePasswordStatus &&
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Change
-                                Password</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("profile.change-password")}</h2>
                             <form className="space-y-3" onSubmit={handleChangePassword}>
-                                <Label>Current Password</Label>
+                                <Label>{t("profile.current-password")}</Label>
                                 <Input
                                     type="password"
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                     required
                                 />
-                                <Label>New Password</Label>
+                                <Label>{t("profile.new-password")}</Label>
                                 <Input
                                     type="password"
                                     value={newPassword}
@@ -157,11 +157,11 @@ const ProfilePage: React.FC=() =>{
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                                     <div className="mt-2">
-                                        <Button variant="primary" type="submit">Change Password</Button>
+                                        <Button variant="primary" type="submit">{t("profile.change-password")}</Button>
                                     </div>
                                     <div className="mt-2">
                                         <Button variant="secondary"
-                                                onClick={() => setChangePasswordStatus(false)}>Cancel</Button>
+                                                onClick={() => setChangePasswordStatus(false)}>{t("profile.cancel")}</Button>
                                     </div>
                                 </div>
 
@@ -171,10 +171,9 @@ const ProfilePage: React.FC=() =>{
                     }
                     {changeUsernameStatus &&
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Change
-                                Username</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("profile.change-username")}</h2>
                             <form className="space-y-3" onSubmit={handleChangeUsername}>
-                                <Label>New Username</Label>
+                                <Label>{t("profile.new-username")}</Label>
                                 <Input
                                     type="text"
                                     value={newUsername}
@@ -183,11 +182,11 @@ const ProfilePage: React.FC=() =>{
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                                     <div className="mt-2">
-                                        <Button variant="primary" type="submit">Change Username</Button>
+                                        <Button variant="primary" type="submit">{t("profile.change-username")}</Button>
                                     </div>
                                     <div className="mt-2">
                                         <Button variant="secondary"
-                                                onClick={() => setChangeUsernameStatus(false)}>Cancel
+                                                onClick={() => setChangeUsernameStatus(false)}>{t("profile.cancel")}
                                         </Button>
                                     </div>
                                 </div>
@@ -195,33 +194,28 @@ const ProfilePage: React.FC=() =>{
                         </div>
                     }
                     <div className="m-3">
-                        <Button variant="secondary" onClick={() => navigate('/Menu')}>Back to Menu</Button>
+                        <Button variant="secondary" onClick={() => navigate('/Menu')}>{t("profile.back")}</Button>
                     </div>
                 </div>
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                     {!updateProfileStatus &&
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Profile
-                                Information</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">First
-                                Name: {first_name}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Last
-                                Name: {last_name}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Description: {description}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Profile
-                                Picture: {profile_picture_url}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("profile.profile-info")}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.first-name")}: {first_name}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.last-name")}: {last_name}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.description")}: {description}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.profile-picture")}: {profile_picture_url}</h2>
                             <div className="m-3">
                                 <Button style={{visibility: !updateProfileStatus ? 'visible' : 'hidden'}}
-                                        onClick={() => setUpdateProfileStatus(true)}>Update Profile
+                                        onClick={() => setUpdateProfileStatus(true)}>{t("profile.update-profile")}
                                 </Button>
                             </div>
                         </div>}
                     {updateProfileStatus &&
                         <div>
-                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Change
-                                Profile</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("profile.update-profile")}</h2>
                             <form className="space-y-3" onSubmit={handleUpdateProfile}>
-                                <Label>First Name</Label>
+                                <Label>{t("profile.first-name")}</Label>
                                 <Input
                                     placeholder={first_name}
                                     type="text"
@@ -229,7 +223,7 @@ const ProfilePage: React.FC=() =>{
                                     onChange={(e) => setNewFirstName(e.target.value)}
                                     required
                                 />
-                                <Label>Last Name</Label>
+                                <Label>{t("profile.last-name")}</Label>
                                 <Input
                                     placeholder={last_name}
                                     type="text"
@@ -237,7 +231,7 @@ const ProfilePage: React.FC=() =>{
                                     onChange={(e) => setNewLastName(e.target.value)}
                                     required
                                 />
-                                <Label>Description</Label>
+                                <Label>{t("profile.description")}</Label>
                                 <Input
                                     placeholder={'Description'}
                                     type="text"
@@ -245,7 +239,7 @@ const ProfilePage: React.FC=() =>{
                                     onChange={(e) => seNewtDescription(e.target.value)}
                                     required
                                 />
-                                <Label>Profile Picture</Label>
+                                <Label>{t("profile.profile-picture")}</Label>
                                 <Input
                                     placeholder={profile_picture_url}
                                     type="text"
@@ -255,12 +249,12 @@ const ProfilePage: React.FC=() =>{
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                                     <div className="mt-2">
-                                        <Button variant="primary" type="submit">Update Profile
+                                        <Button variant="primary" type="submit">{t("profile.update-profile")}
                                         </Button>
                                     </div>
                                     <div className="mt-2">
                                         <Button variant="secondary"
-                                                onClick={() => setUpdateProfileStatus(false)}>Cancel
+                                                onClick={() => setUpdateProfileStatus(false)}>{t("profile.cancel")}
                                         </Button>
                                     </div>
                                 </div>

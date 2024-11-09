@@ -13,6 +13,7 @@ import Button from "../../../shared/components/UI/Button.tsx";
 import {PaperAirplaneIcon, UserCircleIcon} from "@heroicons/react/16/solid";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 const CompetitionLobbyPage: React.FC = () => {
     const location = useLocation();
@@ -34,16 +35,17 @@ const CompetitionLobbyPage: React.FC = () => {
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingGeneration, setIsLoadingGeneration] = useState(false);
+    const [t] = useTranslation("global");
 
     const isSinglePlayer = mode === 'sp';
     const navigate = useNavigate();
     document.title = "Lobby";
     const handleLeaveCompetition = async () => {
-        const confirmLeave = window.confirm("Are you sure you want to leave the competition?");
+        const confirmLeave = window.confirm(t("competition-lobby.leave-alert"));
         if (confirmLeave) {
             try {
                 await CompetitionService.leaveCompetition(accessCode);
-                alert('You have left the competition successfully.');
+                alert(t("competition-lobby.leave-success"));
 
                 // Cierra el WebSocket si está abierto
                 if (websocket) {
@@ -59,9 +61,9 @@ const CompetitionLobbyPage: React.FC = () => {
                 }
             } catch (error: unknown) {
                 if (error instanceof Error) {
-                    alert(`Error al dejar la competencia: ${error.message}`);
+                    alert(`${t("competition-lobby.leave-error")} ${error.message}`);
                 } else {
-                    alert("Error al dejar la competencia y no se pudo identificar el mensaje del error.");
+                    alert(`${t("competition-lobby.leave-error")})`);
                 }
             }
         }
@@ -127,13 +129,13 @@ const CompetitionLobbyPage: React.FC = () => {
                     currentUser.user_id
                 );
                 if (!validParticipant) {
-                    alert('You are not a participant of this competition.');
+                    alert(t("competition-lobby.invalid-participant"));
                     navigate('/JoinCompetition');
                 }
             } catch (error) {
                 setIsLoading(false);
                 console.error('Error fetching competition ID:', error);
-                alert('Error al obtener la información de la competencia.');
+                alert("competition-lobby.get-data-error");
                 navigate('/JoinCompetition');
             }
             setIsLoading(false);
@@ -197,20 +199,18 @@ const CompetitionLobbyPage: React.FC = () => {
             setWebSocket(ws);
 
 
-            const handleBeforeUnload = async () => {
-                if (!isNavigating) {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        ws.close();
-                    }
-                    await CompetitionService.leaveCompetition(accessCode);
-                    console.log('Conexión WebSocket cerrada y abandonando la competencia antes de cerrar la pestaña');
-                }
+            const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+                sessionStorage.setItem('isReloading', 'true'); // Establece el flag
+                event.preventDefault();
+                event.returnValue = ''; // Mostrar advertencia para evitar la salida
             };
 
             const handleNavigation = () => {
-                console.log("estado: ", isNavigating);
-                if(!isNavigating){
-                    handleLeaveCompetition()
+                const isReloading = sessionStorage.getItem('isReloading') === 'true';
+                if (!isNavigating && !isReloading) {
+                    handleLeaveCompetition();
+                } else {
+                    sessionStorage.removeItem('isReloading'); // Eliminar flag si fue una recarga
                 }
             };
 
@@ -232,7 +232,7 @@ const CompetitionLobbyPage: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
-                        <p className="text-lg font-semibold">Getting Competition...</p>
+                        <p className="text-lg font-semibold">{t("competition-lobby.loading")}</p>
                     </div>
                 </div>
             )}
@@ -240,33 +240,30 @@ const CompetitionLobbyPage: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
-                        <p className="text-lg font-semibold">Generating Challenges...</p>
-                        <p>Please wait while we create the challenges. This might take a few seconds.</p>
+                        <p className="text-lg font-semibold">{t("competition-lobby.generating")}</p>
                     </div>
                 </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 pt-9 lg:px-8">
                 <div>
                 <div className="grid ggrid-cols-1 md:grid-cols-2 gap-4">
-                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Name: {competitionName}</h2>
-                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Number of
-                            exercises: {numberOfExercises}</h2>
-                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Time
-                            Limit(minutes): {timeLimit}</h2>
-                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Host: {creatorName}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.name")}: {competitionName}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.number-of-exercises")}: {numberOfExercises}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.time-limit")}: {timeLimit}</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.host")}: {creatorName}</h2>
 
                     </div>
                     {!isSinglePlayer && accessCode ? (
                         <div>
                             <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900"><strong>
-                                Access Code:</strong> {accessCode}</p>
+                                {t("competition-lobby.access-code")}:</strong> {accessCode}</p>
                             <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">
-                                <strong>Password: </strong> {password ? password : 'Sin contraseña establecida'}</p>
+                                <strong>{t("competition-lobby.password")}: </strong> {password ? password : t("competition-lobby.if-no-password")}</p>
                         </div>
                     ) : null}
-                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Challenges</h2>
+                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.challenges")}</h2>
                     {challenges.length === 0 ? (
-                        <p className="ml-3">No hay desafíos disponibles aún.</p>
+                        <p className="ml-3">{t("competition-lobby.if-no-challenges")}</p>
                     ) : (
                         challenges.map((challenge, index) => (
                             <div className="ml-3" key={index}>
@@ -292,8 +289,7 @@ const CompetitionLobbyPage: React.FC = () => {
                     {creatorId === currentUserId && (
                         <div className="justify-items-center w-full mt-5">
                             <div className="max-w-40">
-                                <Button variant={isGenerateButtonDisabled() ? 'disabled' : 'primary'} onClick={() => setIsFormVisible(true)}>Generate
-                                    Challenges
+                                <Button variant={isGenerateButtonDisabled() ? 'disabled' : 'primary'} onClick={() => setIsFormVisible(true)}>{t("competition-lobby.generate-challenges")}
                                 </Button>
                             </div>
                         </div>
@@ -308,8 +304,7 @@ const CompetitionLobbyPage: React.FC = () => {
                 <div>
                     {!isSinglePlayer && (
                         <div>
-                            <h2 className="mt-1 mb-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Connected
-                                Users</h2>
+                            <h2 className="mt-1 mb-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition-lobby.connected-players")}</h2>
                             <ul className="ml-3">
                                 {connectedUsers.map((user, index) => (
                                     <li key={index} className="flex items-center space-x-2">
@@ -327,7 +322,7 @@ const CompetitionLobbyPage: React.FC = () => {
                                 <div
                                     className="chat-messages  h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
                                     {messages.length === 0 ? (
-                                        <p>No hay mensajes aún.</p>
+                                        <p>{t("competition-lobby.no-messages")}</p>
                                     ) : (
                                         messages.map((message, index) => (
                                             <div key={index} className="mb-2">
@@ -347,11 +342,11 @@ const CompetitionLobbyPage: React.FC = () => {
                                                 handleSendMessage();
                                             }
                                         }}
-                                        placeholder="Write a message"
+                                        placeholder={t("competition-lobby.placeholder")}
                                     />
                                     <Button variant="primary" onClick={handleSendMessage}>
                                         <div className="flex items-center space-x-2">
-                                            Send <PaperAirplaneIcon className="h-5 ml-3"/>
+                                            {t("competition-lobby.send")} <PaperAirplaneIcon className="h-5 ml-3"/>
                                         </div>
                                     </Button>
                                 </div>
@@ -362,13 +357,13 @@ const CompetitionLobbyPage: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 md:pr-52 md:pl-52 gap-4 mb-10">
                 <div className="m-5">
-                    <Button variant="secondary" onClick={handleLeaveCompetition}>Left the competition</Button>
+                    <Button variant="secondary" onClick={handleLeaveCompetition}>{t("competition-lobby.back")}</Button>
                 </div>
                 {creatorId === currentUserId && (
                     <div className="m-5">
                         <Button  onClick={handleStartCompetition}
                                 variant={!isGenerateButtonDisabled() ? 'disabled' : 'primary'}>
-                            Start Competition
+                            {t("competition-lobby.start")}
                         </Button>
                     </div>
                 )}

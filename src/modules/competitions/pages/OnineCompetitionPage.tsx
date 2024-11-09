@@ -13,6 +13,7 @@ import {ChatMessage} from "../models/ChatMessage.ts";
 import {Input} from "../../../shared/components/UI/Input.tsx";
 import {PaperAirplaneIcon} from "@heroicons/react/16/solid";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 const OnlineCompetitionPage:React.FC=()=>{
     const location = useLocation();
@@ -29,6 +30,7 @@ const OnlineCompetitionPage:React.FC=()=>{
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [newMessage, setNewMessage] = useState<string>('');
     const [timeRemaining, setTimeRemaining] = useState<number>(0);
+    const [t] = useTranslation("global");
 
     const isSinglePlayer = mode === 'sp';
     document.title = "Competition";
@@ -167,8 +169,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
-                        <p className="text-lg font-semibold">Generating Feedbacks...</p>
-                        <p>Please wait while we create the feedbacks.</p>
+                        <p className="text-lg font-semibold">{t("competition.generating-feedback")}</p>
                     </div>
                 </div>
             );
@@ -179,15 +180,14 @@ const OnlineCompetitionPage:React.FC=()=>{
                 <Navbar/>
                 <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
                     <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-sm">
-                        <h1 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Feedback
-                            Summary</h1>
+                        <h1 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.feedback-summary")}</h1>
                         {participantFeedbacks.feedbacks.map((feedback, index) => (
                             <div key={index}>
                                 <h3 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{feedback.challenge_title}</h3>
                                 <ReactMarkdown
                                     className="whitespace-pre-wrap break-words">{feedback.feedback}</ReactMarkdown>
                                 <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">
-                                    <strong>Score:</strong> {feedback.score}</p>
+                                    <strong>{t("competition.score")}:</strong> {feedback.score}</p>
                             </div>
                         ))}
                         <Button variant="secondary" onClick={() => navigate('/CompetitionLobby', {
@@ -197,7 +197,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                                 competitionId,
                                 mode
                             }
-                        })}>Back to Lobby</Button>
+                        })}>{t("competition.back")}</Button>
                     </div>
                 </div>
 
@@ -209,17 +209,14 @@ const OnlineCompetitionPage:React.FC=()=>{
             <Navbar/>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-screen">
                 <div className="challenge-section">
-                    <h1 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Competition in
-                        Progress</h1>
-                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Current
-                        Challenge</h2>
-                    <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">Time
-                        Remaining: {formatTime(timeRemaining)}</p>
+                    <h1 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.title")}</h1>
+                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.subtitle")}</h2>
+                    <p className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("competition.time-left")}: {formatTime(timeRemaining)}</p>
 
                     <div className="overflow-y-scroll overflow-x-hidden max-h-[50vh] p-2 bg-white rounded-md shadow-md">
                     {waitingForOthers ? (
                             <div>
-                                <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900"> Wait for others to finish their challenges</p>
+                                <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.waiting")}</p>
                             </div>
                         ) : challenge ? (
                             <div>
@@ -229,20 +226,20 @@ const OnlineCompetitionPage:React.FC=()=>{
                                 <pre className="whitespace-pre-wrap break-words">{challenge.output_example}</pre>
                             </div>
                         ) : (
-                            <p>No challenge yet</p>
+                            <p>{t("competition.no-challenge-yet")}</p>
                         )}
                     </div>
                 </div>
 
                 <div className="code-section">
-                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Send your Solution</h2>
+                    <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.solution-placeholder")}</h2>
                     <CodeMirror
                         value={code}
                         extensions={[python()]}
                         theme="dark"
                         height="300px"
                         onChange={(value) => setCode(value)}
-                        placeholder="Write your code here..."
+                        placeholder={t("competition.code-placeholder")}
                         readOnly={waitingForOthers}
                     />
                     <div className="m-5">
@@ -250,7 +247,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                                 onClick={() => handleSubmitCode(code)}
                                 disabled={!challenge || code.trim() === '' || waitingForOthers} // Desactivar botón cuando se está esperando o no hay desafío
                         >
-                            Submit Code
+                            {t("competition.send-code")}
                         </Button>
                     </div>
 
@@ -258,17 +255,13 @@ const OnlineCompetitionPage:React.FC=()=>{
                         Request Feedbacks
                     </Button>*/}
                 </div>
-                {waitingForOthers && (
-                    <p className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Waiting for other participants to finish...</p>
-                )}
                 {!isSinglePlayer && (
                     <div className="chat-section">
-                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Participants
-                            Chat</h2>
+                        <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Chat</h2>
                         <div
                             className="chat-messages  h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
                             {messages.length === 0 ? (
-                                <p>No hay mensajes aún.</p>
+                                <p>{t("competition.no-messages")}</p>
                             ) : (
                                 messages.map((message, index) => (
                                     <div key={index} className="mb-2">
@@ -288,11 +281,11 @@ const OnlineCompetitionPage:React.FC=()=>{
                                         handleSendMessage();
                                     }
                                 }}
-                                placeholder="Write a message"
+                                placeholder={t("competition.message-placeholder")}
                             />
                             <Button variant="primary" onClick={handleSendMessage}>
                                 <div className="flex items-center space-x-2">
-                                    Send <PaperAirplaneIcon className="h-5 ml-3"/>
+                                    {t("competition.send")} <PaperAirplaneIcon className="h-5 ml-3"/>
                                 </div>
                             </Button>
                         </div>

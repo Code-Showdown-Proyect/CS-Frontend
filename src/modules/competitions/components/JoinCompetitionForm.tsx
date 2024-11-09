@@ -6,12 +6,14 @@ import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {ArrowLeftIcon} from "@heroicons/react/16/solid";
 import {FaSpinner} from "react-icons/fa";
+import {useTranslation} from "react-i18next";
 
 const JoinCompetitionForm: React.FC = () => {
     const [accessCode, setAccessCode] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const[t] = useTranslation("global");
     const handleJoin = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -23,7 +25,7 @@ const JoinCompetitionForm: React.FC = () => {
         } catch (error) {
             setIsLoading(false);
             console.error('Error joining the competition:', error);
-            alert('There was an error joining the competition.');
+            alert(t("join-competition.error"));
         }
     };
 
@@ -33,14 +35,13 @@ const JoinCompetitionForm: React.FC = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
                         <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
-                        <p className="text-lg font-semibold">Joining to Competition...</p>
-                        <p>Please wait while we prepare the competition. This might take a few seconds.</p>
+                        <p className="text-lg font-semibold">{t("join-competition.loading")}</p>
                     </div>
                 </div>
             )}
             <form className="space-y-6" onSubmit={handleJoin}>
                 <div className="mt-2">
-                    <Label>Access Code</Label>
+                    <Label>{t("join-competition.access-code")}</Label>
                     <Input
                         placeholder="ASXSD"
                         type="text"
@@ -50,7 +51,7 @@ const JoinCompetitionForm: React.FC = () => {
                     />
                 </div>
                 <div className="mt-2">
-                    <Label>Password</Label>
+                    <Label>{t("join-competition.password")}</Label>
                     <Input
                         placeholder="********"
                         type="password"
@@ -58,11 +59,11 @@ const JoinCompetitionForm: React.FC = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
-                <Button variant="secondary" type="submit">Join Competition</Button>
+                <Button variant="secondary" type="submit">{t("join-competition.join")}</Button>
                 <Button variant="secondary" type={"button"} onClick={() => navigate('/OnlineCompetitionMenu')}>
                     <div className="flex items-center space-x-2">
                         <ArrowLeftIcon className="h-5 w-5"/>
-                        <span>Back</span>
+                        <span>{t("join-competition.back")}</span>
                     </div>
                 </Button>
             </form>
