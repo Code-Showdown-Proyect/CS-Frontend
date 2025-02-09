@@ -147,8 +147,20 @@
     "current-password": "Current Password",
     "new-password": "New Password",
     "cancel": "Cancel",
-    "new-username": "New Username"
+    "new-username": "New Username",
+    "statistics": "Statistics"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "loading": "Fetching Statistics...",
+    "error": "Error fetching statistics",
+    "no-statistics": "No statistics available yet",
+    "back": "Return to Profile",
+    "competitions_completed": "Competitions Completed",
+    "total_score": "Total Score",
+    "average_score": "Average Score",
+    "best_score": "Best Score",
+    "challenge_completed": "Challenges Completed"
   }
-
 
 }

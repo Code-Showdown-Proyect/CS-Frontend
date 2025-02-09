@@ -9,6 +9,7 @@ import {Input} from "../../../shared/components/UI/Input.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
 import {FaSpinner} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
+import {StatisticsService} from "../../statistics/service/StatisticsService.ts";
 
 const ProfilePage: React.FC=() =>{
     const [currentUser, setCurrentUser] = useState<AuthUser|null>(null);
@@ -28,6 +29,13 @@ const ProfilePage: React.FC=() =>{
     const [newDescription, seNewtDescription] = useState('');
     const [newProfilePictureUrl, setNewProfilePictureUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    //statistics
+    const [competitionsCompleted, setCompetitionsCompleted] = useState(0);
+    const [totalScore, setTotalScore] = useState(0);
+    const [averageScore, setAverageScore] = useState(0);
+    const [bestScore, setBestScore] = useState(0);
+    const [challengeCompletedCount, setChallengeCompletedCount] = useState(0);
+
     const navigate = useNavigate();
     const [t] = useTranslation("global")
     document.title = t("profile.title");
@@ -44,6 +52,13 @@ const ProfilePage: React.FC=() =>{
                 const currentUserResponse = await AuthService.getCurrentUser();
                 setCurrentUser(currentUserResponse);
                 setIsLoading(false);
+                const statistics = await StatisticsService.getStatistics();
+                setCompetitionsCompleted(statistics.competition_stats.competitions_completed);
+                setTotalScore(statistics.competition_stats.total_score);
+                setAverageScore(statistics.competition_stats.average_score);
+                setBestScore(statistics.performance_stats.best_score);
+                setChallengeCompletedCount(statistics.performance_stats.challenge_completed_count);
+
             } catch (error) {
                 setIsLoading(false);
                 alert(t("profile.error-getting-info"));
@@ -105,7 +120,7 @@ const ProfilePage: React.FC=() =>{
             {isLoading && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
-                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900" />
+                        <FaSpinner className="animate-spin h-10 w-10 text-blue-900"/>
                         <p className="text-lg font-semibold">{t("profile.getting-info")}</p>
                     </div>
                 </div>
@@ -113,6 +128,15 @@ const ProfilePage: React.FC=() =>{
             <div className="w-full justify-items-center mt-5">
                 <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">{t("profile.title")}</h1>
             </div>
+            {profile_picture_url ? (
+                <img
+                    src={`${profile_picture_url}`}
+                    alt="Profile"
+                    className="mt-5 mx-auto w-40 h-40 rounded-full shadow-lg"
+                />
+            ) : (
+                <p className="text-center mt-4 text-gray-500">No hay imagen de perfil</p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10 mt-3">
                 <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                     {!changePasswordStatus && !changeUsernameStatus &&
@@ -204,7 +228,7 @@ const ProfilePage: React.FC=() =>{
                             <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.first-name")}: {first_name}</h2>
                             <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.last-name")}: {last_name}</h2>
                             <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.description")}: {description}</h2>
-                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.profile-picture")}: {profile_picture_url}</h2>
+                            <h2 className="mt-1 text-left text-2xl/9 font-light tracking-tight text-gray-900">{t("profile.profile-picture")}</h2>
                             <div className="m-3">
                                 <Button style={{visibility: !updateProfileStatus ? 'visible' : 'hidden'}}
                                         onClick={() => setUpdateProfileStatus(true)}>{t("profile.update-profile")}
@@ -261,6 +285,35 @@ const ProfilePage: React.FC=() =>{
                             </form>
                         </div>
                     }
+                </div>
+            </div>
+            <div className="w-full justify-items-center mt-5">
+                <h1 className="mt-1 text-center text-2xl/9 font-bold tracking-tight text-gray-900">{t("profile.statistics")}</h1>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-10 mt-3">
+                <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm w-full">
+                    <div className="space-y-3">
+                        <div className="flex justify-between text-2xl font-medium text-gray-900">
+                            <span>{t("statistics.competitions_completed")}:</span>
+                            <span>{competitionsCompleted}</span>
+                        </div>
+                        <div className="flex justify-between text-2xl font-light text-gray-900">
+                            <span>{t("statistics.total_score")}:</span>
+                            <span>{totalScore}</span>
+                        </div>
+                        <div className="flex justify-between text-2xl font-light text-gray-900">
+                            <span>{t("statistics.average_score")}:</span>
+                            <span>{averageScore}</span>
+                        </div>
+                        <div className="flex justify-between text-2xl font-light text-gray-900">
+                            <span>{t("statistics.best_score")}:</span>
+                            <span>{bestScore}</span>
+                        </div>
+                        <div className="flex justify-between text-2xl font-light text-gray-900">
+                            <span>{t("statistics.challenge_completed")}:</span>
+                            <span>{challengeCompletedCount}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

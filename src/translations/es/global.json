@@ -147,6 +147,19 @@
     "current-password": "Contraseña Actual",
     "new-password": "Nueva Contraseña",
     "cancel": "Cancelar",
-    "new-username": "Nuevo Nombre de Usuario"
+    "new-username": "Nuevo Nombre de Usuario",
+    "statistics": "Estadísticas"
+  },
+  "statistics": {
+    "title": "Estadísticas",
+    "loading": "Obteniendo Estadísticas...",
+    "error": "Error al obtener estadísticas",
+    "no-statistics": "No hay estadísticas disponibles",
+    "back": "Volver al Perfil",
+    "competitions_completed": "Competencias Completadas",
+    "total_score": "Puntaje Total",
+    "average_score": "Puntaje Promedio por competencia",
+    "best_score": "Mejor Puntaje",
+    "challenge_completed": "Desafíos Completados"
   }
 }
