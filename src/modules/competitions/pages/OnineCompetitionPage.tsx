@@ -14,6 +14,8 @@ import {Input} from "../../../shared/components/UI/Input.tsx";
 import {PaperAirplaneIcon} from "@heroicons/react/16/solid";
 import {FaSpinner} from "react-icons/fa";
 import {useTranslation} from "react-i18next";
+import {ChallengeService} from "../../challenges/services/ChallengeService.ts";
+import {Clue} from "../../challenges/models/Clue.ts";
 
 const OnlineCompetitionPage:React.FC=()=>{
     const location = useLocation();
@@ -30,6 +32,9 @@ const OnlineCompetitionPage:React.FC=()=>{
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [newMessage, setNewMessage] = useState<string>('');
     const [timeRemaining, setTimeRemaining] = useState<number>(0);
+    const [clues, setClues] = useState<string[]>([]);
+    const [clueIndex, setClueIndex] = useState<number>(0);
+    const [showClues, setShowClues] = useState<boolean>(false);
     const [t] = useTranslation("global");
 
     const isSinglePlayer = mode === 'sp';
@@ -70,6 +75,18 @@ const OnlineCompetitionPage:React.FC=()=>{
                 setChallenge(data);
                 setTimeRemaining(timeLimit * 60);
                 setWaitingForOthers(false);
+                console.log(data)
+                if (data.challenge_id) {
+                    ChallengeService.getCluesbyChallengeId(data.challenge_id)
+                        .then(clueList => {
+                            const clueTexts = clueList.map((clue: Clue) => clue.description);
+                            setClues(clueTexts);
+                            console.log(clueTexts)
+                        })
+                        .catch(error => {
+                            console.error("Error loading clues:", error);
+                        });
+                }
             }  else if (data.message === 'Waiting_others') {
                 setWaitingForOthers(true);
             } else if (data.action === 'all_participants_done') {
@@ -255,11 +272,50 @@ const OnlineCompetitionPage:React.FC=()=>{
                         Request Feedbacks
                     </Button>*/}
                 </div>
-                {!isSinglePlayer && (
+                {/* Si es single player, solo muestra las pistas */}
+                {isSinglePlayer ? (
+                    clues.length > 0 && (
+                        <div className="chat-section">
+                            <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">{t("competition.clues")}</h2>
+                            <div className="mt-4 p-4 bg-blue-50 rounded-md shadow">
+                                {!showClues ? (
+                                    <Button variant="secondary" onClick={() => setShowClues(true)}>
+                                        {t("competition.show-clue")}
+                                    </Button>
+                                ) : (
+                                    <div>
+                                        <p className="text-gray-800 font-medium mb-2">
+                                            {t("competition.clues")} {clueIndex + 1} {t("competition.of")} {clues.length}
+                                        </p>
+                                        <ReactMarkdown className="prose prose-sm text-gray-700 mb-4">
+                                            {clues[clueIndex]}
+                                        </ReactMarkdown>
+                                        <div className="flex justify-between">
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => setClueIndex(prev => Math.max(0, prev - 1))}
+                                                disabled={clueIndex === 0}
+                                            >
+                                                ← {t("competition.clue-previous")}
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => setClueIndex(prev => Math.min(clues.length - 1, prev + 1))}
+                                                disabled={clueIndex === clues.length - 1}
+                                            >
+                                                {t("competition.clue-next")} →
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )
+                ) : (
+                    // Modo multiplayer con chat + pistas
                     <div className="chat-section">
                         <h2 className="mt-1 text-left text-2xl/9 font-medium tracking-tight text-gray-900">Chat</h2>
-                        <div
-                            className="chat-messages  h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
+                        <div className="chat-messages h-64 overflow-y-scroll p-2 bg-white border-b border-gray-200 rounded-md">
                             {messages.length === 0 ? (
                                 <p>{t("competition.no-messages")}</p>
                             ) : (
@@ -270,8 +326,7 @@ const OnlineCompetitionPage:React.FC=()=>{
                                 ))
                             )}
                         </div>
-                        <div
-                            className="chat-input mt-4 flex flex-col md:flex-row items-center md:space-x-2 space-y-2 md:space-y-0">
+                        <div className="chat-input mt-4 flex flex-col md:flex-row items-center md:space-x-2 space-y-2 md:space-y-0">
                             <Input
                                 type="text"
                                 value={newMessage}
@@ -285,12 +340,47 @@ const OnlineCompetitionPage:React.FC=()=>{
                             />
                             <Button variant="primary" onClick={handleSendMessage}>
                                 <div className="flex items-center space-x-2">
-                                    {t("competition.send")} <PaperAirplaneIcon className="h-5 ml-3"/>
+                                    {t("competition.send")} <PaperAirplaneIcon className="h-5 ml-3" />
                                 </div>
                             </Button>
                         </div>
+                        {clues.length > 0 && (
+                            <div className="mt-4 p-4 bg-blue-50 rounded-md shadow">
+                                {!showClues ? (
+                                    <Button variant="secondary" onClick={() => setShowClues(true)}>
+                                        {t("competition.show-clue")}
+                                    </Button>
+                                ) : (
+                                    <div>
+                                        <p className="text-gray-800 font-medium mb-2">
+                                            {t("competition.clues")} {clueIndex + 1} {t("competition.of")} {clues.length}
+                                        </p>
+                                        <ReactMarkdown className="prose prose-sm text-gray-700 mb-4">
+                                            {clues[clueIndex]}
+                                        </ReactMarkdown>
+                                        <div className="flex justify-between">
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => setClueIndex(prev => Math.max(0, prev - 1))}
+                                                disabled={clueIndex === 0}
+                                            >
+                                                ← {t("competition.clue-previous")}
+                                            </Button>
+                                            <Button
+                                                variant="secondary"
+                                                onClick={() => setClueIndex(prev => Math.min(clues.length - 1, prev + 1))}
+                                                disabled={clueIndex === clues.length - 1}
+                                            >
+                                                {t("competition.clue-next")} →
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
+
             </div>
         </div>
     );

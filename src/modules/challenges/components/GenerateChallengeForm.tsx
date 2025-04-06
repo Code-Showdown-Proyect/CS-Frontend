@@ -5,18 +5,49 @@ import {Input} from "../../../shared/components/UI/Input.tsx";
 import {useTranslation} from "react-i18next";
 
 interface GenerateChallengeForm{
-    onSubmit:(difficulty: string, topic: string) => void;
+    onSubmit:(difficulty: string, topic: string, numberOfClues: number) => void;
     onCancel: () => void;
 }
 
 const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCancel}) => {
-    const [difficulty, setDifficulty] = useState<string>('easy');
+    const [difficulty, setDifficulty] = useState<string>('');
     const [topic, setTopic] = useState<string>('');
+    const[numberOfClues, setNumberOfClues] = useState<number>(0);
     const [t] = useTranslation("global");
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        onSubmit(difficulty, topic);
+
+        if (!difficulty) {
+            alert(t("generate-challenges.error-difficulty")); // mensaje traducido
+            return;
+        }
+
+        if (!topic.trim()) {
+            alert(t("generate-challenges.error-topic")); // mensaje traducido
+            return;
+        }
+
+        onSubmit(difficulty, topic, numberOfClues);
+    };
+
+    const handleDifficultyChange = (value: string) => {
+        setDifficulty(value);
+
+        // Asignar cantidad de pistas según la dificultad
+        switch (value) {
+            case 'easy':
+                setNumberOfClues(5);
+                break;
+            case 'normal': // asumiendo que "normal" es medium
+                setNumberOfClues(3);
+                break;
+            case 'hard':
+                setNumberOfClues(1);
+                break;
+            default:
+                setNumberOfClues(0);
+        }
     };
 
     return (
@@ -25,7 +56,10 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
             <form className="space-y-6"  onSubmit={handleSubmit}>
                 <Label>
                     {t("generate-challenges.difficulty")}:
-                    <select className="ml-2 h-full rounded-md border-2 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+                    <select className="ml-2 h-full rounded-md border-2 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm" value={difficulty} onChange={(e) => handleDifficultyChange(e.target.value)}>
+                        <option value="" disabled>
+                            {t("generate-challenges.select-difficulty")}
+                        </option>
                         <option value="easy">{t("generate-challenges.easy")}</option>
                         <option value="normal">{t("generate-challenges.medium")}</option>
                         <option value="hard">{t("generate-challenges.hard")}</option>
@@ -39,6 +73,9 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
                         onChange={(e) => setTopic(e.target.value)}
                         placeholder={t("generate-challenges.topic-placeholder")}
                     />
+                </Label>
+                <Label>
+                    {t("generate-challenges.number-of-clues")}: {numberOfClues}
                 </Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 md:pr-10 md:pl-10 gap-4 mb-10">
                     <Button variant="primary" type="submit">{t("generate-challenges.generate")}</Button>

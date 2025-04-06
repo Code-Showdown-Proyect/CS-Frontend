@@ -98,6 +98,10 @@
     "easy": "Fácil",
     "medium": "Medio",
     "hard": "Difícil",
+    "number-of-clues": "Número de Pistas",
+    "select-difficulty": "Seleccione una dificultad",
+    "error-difficulty": "Por favor selecciona una dificultad.",
+    "error-topic": "Por favor ingresa un tema.",
     "topic-placeholder": "Escoge un tema",
     "generate": "Generar",
     "back": "Cancelar",
@@ -119,7 +123,12 @@
     "back": "Volver a Lobby",
     "waiting": "Esperando a que los demás jugadores terminen",
     "no-challenge-yet": "Aún no hay desafíos disponibles",
-    "code-placeholder": "Escribe tu código aquí"
+    "code-placeholder": "Escribe tu código aquí",
+    "clues": "Pistas",
+    "clue-next": "Pista Siguiente",
+    "clue-previous": "Pista Anterior",
+    "show-clue": "Mostrar Pista",
+    "of": "de"
   },
   "profile": {
     "title": "Perfil",

@@ -98,6 +98,10 @@
     "easy": "Easy",
     "medium": "Medium",
     "hard": "Hard",
+    "number-of-clues": "Number of Hints",
+    "select-difficulty": "Choose a difficulty",
+    "error-difficulty": "Please select a difficulty.",
+    "error-topic": "Please select a topic.",
     "topic-placeholder": "Select a topic",
     "generate": "Generate",
     "back": "Cancel",
@@ -119,7 +123,12 @@
     "back": "Return to Lobby",
     "waiting": "Waiting for other players to finish",
     "no-challenge-yet": "No challenges available yet",
-    "code-placeholder": "Write your code here"
+    "code-placeholder": "Write your code here",
+    "clues": "Hints",
+    "clue-next": "Next Hint",
+    "clue-previous": "Previous Hint",
+    "show-clue": "Show Hints",
+    "of": "of"
   },
   "profile": {
     "title": "Profile",

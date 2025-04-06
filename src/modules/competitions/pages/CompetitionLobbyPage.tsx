@@ -68,7 +68,7 @@ const CompetitionLobbyPage: React.FC = () => {
             }
         }
     };
-    const handleGenerateChallenges = async (difficulty: string, topic: string) => {
+    const handleGenerateChallenges = async (difficulty: string, topic: string, numberOfClues: number) => {
         if (competitionId && numberOfExercises) {
             setIsLoadingGeneration(true);
             try{
@@ -80,6 +80,7 @@ const CompetitionLobbyPage: React.FC = () => {
                             difficulty,
                             topic,
                             competition_id: competitionId,
+                            numberOfClues: numberOfClues
                         });
                     } catch (error) {
                         console.error('Error generating challenge:', error);
