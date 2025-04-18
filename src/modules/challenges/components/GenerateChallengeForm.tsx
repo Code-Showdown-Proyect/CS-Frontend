@@ -1,9 +1,9 @@
 import {useState} from "react";
 import {Label} from "../../../shared/components/UI/Label.tsx";
 import Button from "../../../shared/components/UI/Button.tsx";
-import {Input} from "../../../shared/components/UI/Input.tsx";
 import {useTranslation} from "react-i18next";
-
+import {ChallengeService} from "../services/ChallengeService.ts";
+import {Topic} from "../models/Topic.ts";
 interface GenerateChallengeForm{
     onSubmit:(difficulty: string, topic: string, numberOfClues: number) => void;
     onCancel: () => void;
@@ -11,6 +11,7 @@ interface GenerateChallengeForm{
 
 const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCancel}) => {
     const [difficulty, setDifficulty] = useState<string>('');
+    const [topics, setTopics] = useState<Topic[]>([]);
     const [topic, setTopic] = useState<string>('');
     const[numberOfClues, setNumberOfClues] = useState<number>(0);
     const [t] = useTranslation("global");
@@ -31,7 +32,7 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
         onSubmit(difficulty, topic, numberOfClues);
     };
 
-    const handleDifficultyChange = (value: string) => {
+    const handleDifficultyChange = async  (value: string) => {
         setDifficulty(value);
 
         // Asignar cantidad de pistas según la dificultad
@@ -39,7 +40,7 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
             case 'easy':
                 setNumberOfClues(5);
                 break;
-            case 'normal': // asumiendo que "normal" es medium
+            case 'medium': // asumiendo que "normal" es medium
                 setNumberOfClues(3);
                 break;
             case 'hard':
@@ -47,6 +48,14 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
                 break;
             default:
                 setNumberOfClues(0);
+        }
+        try {
+            const fetchedTopics = await ChallengeService.getTopicsByDifficulty(value);
+            setTopics(fetchedTopics);
+            setTopic(''); // Resetear el tópico seleccionado
+        } catch (error) {
+            console.error(error);
+            setTopics([]);
         }
     };
 
@@ -61,19 +70,26 @@ const GenerateChallengeForm: React.FC<GenerateChallengeForm> = ({onSubmit, onCan
                             {t("generate-challenges.select-difficulty")}
                         </option>
                         <option value="easy">{t("generate-challenges.easy")}</option>
-                        <option value="normal">{t("generate-challenges.medium")}</option>
+                        <option value="medium">{t("generate-challenges.medium")}</option>
                         <option value="hard">{t("generate-challenges.hard")}</option>
                     </select>
                 </Label>
                 <Label>
                     {t("generate-challenges.topic")}:
-                    <Input
-                        type="text"
+                    <select
                         value={topic}
                         onChange={(e) => setTopic(e.target.value)}
-                        placeholder={t("generate-challenges.topic-placeholder")}
-                    />
+                        className="ml-2 h-full rounded-md border-2 bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                    >
+                        <option value="">{t("generate-challenges.select-topic")}</option>
+                        {topics.map((t) => (
+                            <option key={t.id} value={t.description}>
+                                {t.description}
+                            </option>
+                        ))}
+                    </select>
                 </Label>
+
                 <Label>
                     {t("generate-challenges.number-of-clues")}: {numberOfClues}
                 </Label>

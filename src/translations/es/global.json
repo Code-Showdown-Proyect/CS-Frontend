@@ -106,7 +106,8 @@
     "generate": "Generar",
     "back": "Cancelar",
     "topic": "Tema",
-    "difficulty": "Dificultad"
+    "difficulty": "Dificultad",
+    "select-topic": "Selecciona un tema"
   },
   "competition": {
     "title": "Competencia en Progreso",

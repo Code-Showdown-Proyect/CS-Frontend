@@ -2,6 +2,8 @@ import axios from "axios";
 
 const API_URL = 'https://cs-challenge-context.mangograss-fe7e2f05.brazilsouth.azurecontainerapps.io/challenges'; // Ajusta el URL según tu configuración.
 const API_CLUES= 'https://cs-challenge-context.mangograss-fe7e2f05.brazilsouth.azurecontainerapps.io/clues'; // Ajusta el URL según tu configuración.
+const API_TOPICS= 'https://cs-challenge-context.mangograss-fe7e2f05.brazilsouth.azurecontainerapps.io/topics';
+
 export const ChallengeService = {
     generateChallenge: async (challengeData: {
         difficulty: string,
@@ -52,6 +54,23 @@ export const ChallengeService = {
                 throw new Error(error.response?.data?.detail || 'Error fetching clues');
             } else {
                 throw new Error('Unknown Error fetching clues');
+            }
+        }
+    },
+    getTopicsByDifficulty: async (difficulty: string) => {
+        try {
+            const response = await axios.get(`${API_TOPICS}/${difficulty}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            return response.data;
+        }catch (error) {
+            if (axios.isAxiosError(error)) {
+                console.error('Error fetching topics:', error.response?.data || error.message);
+                throw new Error(error.response?.data?.detail || 'Error fetching topics');
+            } else {
+                throw new Error('Unknown Error fetching topics');
             }
         }
     }

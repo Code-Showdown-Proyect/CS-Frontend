@@ -106,7 +106,8 @@
     "generate": "Generate",
     "back": "Cancel",
     "topic": "Topic",
-    "difficulty": "Difficulty"
+    "difficulty": "Difficulty",
+    "select-topic": "Select a topic"
   },
   "competition": {
     "title": "Competition in Progress",
