@@ -89,7 +89,10 @@
     "invalid-participant": "You are not part of this room",
     "get-data-error": "Error fetching room information",
     "start": "Start Competition",
-    "back": "Leave Room"
+    "back": "Leave Room",
+    "modal-welcome": "Welcome!!",
+    "modal-welcome-text": "Generate a challenge to start",
+    "modal-welcome-confirmation": "Ok"
   },
   "generate-challenges": {
     "title": "Generate Challenges",

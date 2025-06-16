@@ -89,7 +89,10 @@
     "invalid-participant": "No perteneces a esta sala",
     "get-data-error": "Error al obtener información de la sala",
     "start": "Comenzar Competencia",
-    "back": "Dejar Sala"
+    "back": "Dejar Sala",
+    "modal-welcome": "Bienvenido!!",
+    "modal-welcome-text": "Genera un desafío para comenzar",
+    "modal-welcome-confirmation": "Entendido"
   },
   "generate-challenges":{
     "title": "Generar Desafíos",

@@ -35,6 +35,7 @@ const CompetitionLobbyPage: React.FC = () => {
     const [isNavigating, setIsNavigating] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingGeneration, setIsLoadingGeneration] = useState(false);
+    const [showWelcomeModal, setShowWelcomeModal] = useState<boolean>(false);
     const [t] = useTranslation("global");
 
     const isSinglePlayer = mode === 'sp';
@@ -225,10 +226,31 @@ const CompetitionLobbyPage: React.FC = () => {
             };
         }
     }, [competitionId, isNavigating]);
-
+    useEffect(() => {
+        if (
+            challenges.length === 0 &&
+            creatorId !== null &&
+            currentUserId !== null &&
+            creatorId === currentUserId
+        ) {
+            setShowWelcomeModal(true);
+        }
+    }, [challenges, creatorId, currentUserId]);
     return (
         <div>
             <Navbar/>
+            {showWelcomeModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-md shadow-md w-96 text-center">
+                        <h2 className="text-xl font-bold mb-4 text-gray-800">{t("competition-lobby.modal-welcome")}</h2>
+                        <p className="text-gray-700">{t("competition-lobby.modal-welcome-text")}</p>
+                        <div className="mt-6">
+                            <Button onClick={() => setShowWelcomeModal(false)} variant="primary">{t("competition-lobby.modal-welcome-confirmation")}</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {isLoading && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-md shadow-md justify-items-center">
